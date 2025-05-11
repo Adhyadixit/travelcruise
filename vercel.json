@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd client && npm install && npm run build",
+  "buildCommand": "mkdir -p client/src/shared && cp -r shared/* client/src/shared/ && cd client && npm install && npm run build",
   "outputDirectory": "client/dist",
   "installCommand": "npm install",
   "github": {

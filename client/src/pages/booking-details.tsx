@@ -3,7 +3,7 @@ import { useParams, Link, useLocation } from "wouter";
 import { useMediaQuery } from "@/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { Booking, getBookingWithExtras, BookingWithExtras, UserWithFullName, getUserWithFullName } from "@shared/schema";
+import { Booking, getBookingWithExtras, BookingWithExtras, UserWithFullName, getUserWithFullName } from "../shared/schema";
 import { MobileLayout } from "@/components/layout/mobile-layout";
 import { DesktopLayout } from "@/components/layout/desktop-layout";
 import { Button } from "@/components/ui/button";
