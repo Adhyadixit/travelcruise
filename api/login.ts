@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Pool } from 'pg';
+// Use require for pg to avoid ESM issues on Vercel
+const pg = require('pg');
+const { Pool } = pg;
 
 // Create a PostgreSQL connection pool
 const pool = new Pool({
