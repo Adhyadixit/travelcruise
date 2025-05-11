@@ -1,32 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Pool } from 'pg';
 
-// Sample users data
-const users = [
-  {
-    id: 1,
-    username: "admin",
-    // In a real app, this would be a hashed password
-    password: "admin123",
-    email: "admin@travelnexus.com",
-    firstName: "Admin",
-    lastName: "User",
-    role: "admin",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: 2,
-    username: "user",
-    // In a real app, this would be a hashed password
-    password: "user123",
-    email: "user@example.com",
-    firstName: "Regular",
-    lastName: "User",
-    role: "user",
-    createdAt: new Date().toISOString()
-  }
-];
+// Create a PostgreSQL connection pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -44,24 +24,35 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   // Handle POST request for login
   if (req.method === 'POST') {
-    const { username, password } = req.body;
+    try {
+      const { username, password } = req.body;
 
-    // Find user with matching username and password
-    const user = users.find(u => u.username === username && u.password === password);
+      // Find user with matching username and password
+      // In a production app, you would compare hashed passwords
+      const result = await pool.query(
+        'SELECT * FROM users WHERE username = $1 AND password = $2',
+        [username, password]
+      );
 
-    if (user) {
-      // In a real app, you would generate a JWT token here
-      const token = "mock-jwt-token-" + Date.now();
-      
-      // Return user data without password
-      const { password, ...userWithoutPassword } = user;
-      
-      res.status(200).json({
-        user: userWithoutPassword,
-        token
-      });
-    } else {
-      res.status(401).json({ error: 'Invalid username or password' });
+      if (result.rows.length > 0) {
+        const user = result.rows[0];
+        
+        // In a real app, you would use a proper JWT library
+        const token = "jwt-" + Date.now();
+        
+        // Don't send password to client
+        const { password, ...userWithoutPassword } = user;
+        
+        res.status(200).json({
+          user: userWithoutPassword,
+          token
+        });
+      } else {
+        res.status(401).json({ error: 'Invalid username or password' });
+      }
+    } catch (error: any) {
+      console.error('Database error:', error);
+      res.status(500).json({ error: error.message });
     }
     return;
   }
